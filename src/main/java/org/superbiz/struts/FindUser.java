@@ -17,15 +17,28 @@
  */
 package org.superbiz.struts;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import java.util.Properties;
 
+@Component
 public class FindUser {
 
     private int id;
     private String errorMessage;
     private User user;
+    private UserService userService;
+
+    private final Logger logger = LoggerFactory.getLogger(getClass());
+
+    public FindUser(UserService userService) {
+        this.userService = userService;
+    }
 
     public User getUser() {
         return user;
@@ -51,17 +64,14 @@ public class FindUser {
         this.id = id;
     }
 
+    // @Transactional(readOnly = true,)
     public String execute() {
 
         try {
-            UserService service = null;
-            Properties props = new Properties();
-            props.put(Context.INITIAL_CONTEXT_FACTORY,
-                "org.apache.openejb.core.LocalInitialContextFactory");
-            Context ctx = new InitialContext(props);
-            service = (UserService) ctx.lookup("UserServiceImplLocal");
-            this.user = service.find(id);
+            logger.info("find by id={}",id);
+            this.user = userService.find(id);
         } catch (Exception e) {
+            logger.error("find by id error",e.getCause());
             this.errorMessage = e.getMessage();
             return "failure";
         }

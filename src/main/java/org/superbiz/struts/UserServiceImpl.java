@@ -17,23 +17,37 @@
 */
 package org.superbiz.struts;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Repository;
+
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.xml.bind.SchemaOutputResolver;
 import java.util.List;
 
-@Stateless
+@Repository
 public class UserServiceImpl implements UserService {
 
-    @PersistenceContext(unitName = "user")
+    private final Logger logger = LoggerFactory.getLogger(getClass());
+
+    @PersistenceContext
+    //(unitName = "user")
     private EntityManager manager;
 
     public void add(User user) {
+        logger.info("add user={}",user);
         manager.persist(user);
     }
 
-    public User find(int id) {
-        return manager.find(User.class, id);
+    public User find(long id) {
+
+        logger.info("find by id in service={} ",id);
+        User user = manager.find(User.class, id);
+        logger.info("find by id={} user={}",id,user);
+
+        return user;
     }
 
     public List<User> findAll() {
